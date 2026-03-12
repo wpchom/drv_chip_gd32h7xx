@@ -1,0 +1,30 @@
+declare_args() {
+  drv_chip_without_irq = false
+}
+
+pkggroup("gd32h7xx_firmware") {
+}
+
+pkggroup("mds") {
+}
+
+config("drv_chip_gd32h7xx_cfg") {
+  include_dirs = [ "include/" ]
+}
+
+static_library("drv_chip_gd32h7xx") {
+  sources = [ "src/startup_gd32h7xx.c" ]
+
+  defines = []
+
+  if (defined(drv_chip_without_irq) && drv_chip_without_irq) {
+    defines += [ "DRV_CHIP_WITHOUT_IRQ=1" ]
+  }
+
+  public_deps = [
+    ":gd32h7xx_firmware",
+    ":mds",
+  ]
+
+  public_configs = [ ":drv_chip_gd32h7xx_cfg" ]
+}
