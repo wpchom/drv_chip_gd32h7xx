@@ -1,0 +1,48 @@
+declare_args() {
+  gd32h77x_firmware_pkgcfg = {
+    hxtal_value = 25000000
+    system_clock = "__SYSTEM_CLOCK_IRC64M"
+  }
+}
+
+pkggroup("cmsis") {
+  configs = [ "cmsis_core" ]
+}
+
+config("gd32h77x_firmware_cfg") {
+  include_dirs = [
+    "Firmware/CMSIS/GD/GD32H77x/Include",
+    "Firmware/GD32H77x_standard_peripheral/Include",
+    "Template",
+
+    # "include",
+  ]
+
+  defines = [ "GD32H77x" ]
+
+  if (defined(gd32h77x_firmware_pkgcfg.hxtal_value)) {
+    defines += [ "HXTAL_VALUE=${gd32h77x_firmware_pkgcfg.hxtal_value}" ]
+  }
+}
+
+static_library("gd32h77x_firmware") {
+  sources = [
+    "Firmware/CMSIS/GD/GD32H77x/Source/system_gd32h77x.c",
+    "src/gd32h77x_redirect.c",
+    "src/startup_gd32h77x.c",
+  ]
+
+  defines = []
+
+  if (defined(gd32h77x_firmware_pkgcfg.system_clock)) {
+    defines += [ "${gd32h77x_firmware_pkgcfg.system_clock}" ]
+  }
+
+  public_configs = [ ":gd32h77x_firmware_cfg" ]
+
+  public_deps = [ ":cmsis" ]
+}
+
+group("default") {
+  public_deps = [ ":gd32h77x_firmware" ]
+}
